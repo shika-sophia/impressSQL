@@ -9,7 +9,7 @@
 This TEXT is lacking explanation of Practice and Drill. 
 Thus it is difficult for beginner students to understand SQL.
 This Repository is my explanation about Practice chapter1 - chapter8 and Drill Basic Questions.
-If the Sample Data exists, i put an additional file.
+If the Sample Data exists, i will put an additional file.
 
 
 # Reference / 参考文献
