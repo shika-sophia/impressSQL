@@ -1,4 +1,4 @@
-■１章 はじめてのＳＱＬ 練習問題 / p039
+■１章 はじめてのＳＱＬ / 練習問題 p039
 
 ◆問題１－１ 
 (A)データベースの実体は[ファイル]です。
@@ -16,12 +16,26 @@
           DBMSのうち表形式のRDBを扱うDBMSのこと p027
         
 (C)私たちはDBMSに[ＳＱＬ]を送信してデータを操作することができます。
-    ＳＱＬ: 何の略語？
-      SQLは、IBM社のRDBMSのDB2の仕様を多く取り入れたため、
+    ＳＱＬ: 何の略語？ [Structured Query Language？]
+      ◇SQLは、IBM社のRDBMSのDB2の仕様を多く取り入れたため、
       IBMの操作言語「Structured Query Language」の略だと言われる事もあるようですが、
       公式には、「Structured Query Language」という略称はIBM社の言語についてのものであり、
       標準規格のSQLの方は公式には何の略でもないということになっています。
       https://detail.chiebukuro.yahoo.co.jp/qa/question_detail/q1024241580
+      
+      
+      ◇SQLの元になったのは1970年代に米IBM社がRDBMS「System R」を開発する際に、
+      その制御・操作用言語として考案した「SEQUEL」（Structured English Query Language
+      /「シークェル」と読む）である。1980年代以降、他社のRDBMSもSQLを採用するようになり、
+      事実上の標準として普及した。
+
+      当初はメーカーやシステムにより仕様が大きく異なっていたため標準化を求める声が強まり、
+      1986年にANSI（米国国家規格協会）によって標準規格「SQL86」が制定された。
+      ISO（国際標準化機構）とIEC（国際電気標準会議）の情報分野の合同委員会JTC 1は
+      この規格を1987年にISO/IEC 9075として国際標準化している。
+      ちなみに、ANSI規格のSQLという名称は公式には何の略でもないとされる。
+      http://e-words.jp/w/SQL.html
+      
       
 (D)表形式でデータを管理するデータベースを[ＲＤＢ]という。
     上記(B)参照
