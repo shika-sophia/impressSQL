@@ -1,4 +1,6 @@
 # impressSQL
+"September Java Practice, 2020" of Recurrent School
+
 『スッキリＳＱＬ』練習問題解説集
 
 ■TEXT: 中山清喬／飯田理恵子『スッキリわかるＳＱＬ入門 第２版』インプレス, 2018
