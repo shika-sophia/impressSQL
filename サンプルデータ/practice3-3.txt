@@ -2,6 +2,9 @@
 3.7練習問題
 問題3-3
 成績表テーブル
+
+【註】設問でINSERT文を使うので、ここのINSERT文は不要。
+      CREATE文だけ利用しましょう。
 */
 
 CREATE TABLE 成績表 (  学籍番号 CHAR(4), 学生名 VARCHAR(20), 法学 INTEGER, 経済学 INTEGER, 哲学 INTEGER, 情報理論 INTEGER, 外国語 INTEGER, 総合成績 CHAR(1)  );
