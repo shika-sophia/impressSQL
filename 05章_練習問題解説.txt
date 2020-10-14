@@ -1,0 +1,311 @@
+◆練習問題５－１
+(1)(A)
+《解説》
+平均 ＝ 合計 / 個数
+与えられた表から(A)(B)(C)を求める式をまず出して
+UPDATE文に変える。SETで列指定。WHEREで行指定。
+
+(86 + (A) + 68 + 91) / 4 = 80
+(A) = 4 * 80 - (86 + 68 + 91)
+
+SELECT 4 * 80 - (86 + 68 + 91) AS 午後１
+FROM 試験結果
+WHERE 受験者ID = 'SW1046'
+;
+
+UPDATE 試験結果
+SET 午後１ = 4 * 80 - (86 + 68 + 91)
+WHERE 受験者ID = 'SW1046'
+;
+
+(B)
+UPDATE 試験結果
+SET 論述 = 4 * 68 - (65 + 53 + 70)
+WHERE 受験者ID = 'SW1350'
+;
+(C)
+UPDATE 試験結果
+SET 午前 = 4 * 56 - (59 + 56 + 36)
+WHERE 受験者ID = 'SW1877'
+;
+
+(2)合計条件の受験者IDを抽出し、見出しは「合格者ID」とする。
+   [1]午前の点数は60点以上
+   [2]午後１と午後２の合計が120以上
+   [3]論述が合計点の３割以上
+
+《解説》
+・列名を計算式に使える
+・「合計点の３割以上」を算数の式にしてみる。「〇〇の３割」=>「〇〇 * 0.3」
+
+ SELECT 受験者ID AS 合格者ID
+ FROM 試験結果
+ WHERE 午前 >= 60
+   AND (午後１+ 午後２) >= 120
+   AND 論述 >= (午前 + 午後１ + 午後２ + 論述)* 0.3
+ ;
+
+
+ ◆練習問題５－２
+ ★サンプルコード
+CREATE TABLE 回答者 (  メールアドレス CHAR(30), 国名 VARCHAR(20), 性別 VARCHAR(20), 年齢 INTEGER  );
++-----------------------+-------------+------+-----+---------+-------+
+| Field                 | Type        | Null | Key | Default | Extra |
++-----------------------+-------------+------+-----+---------+-------+
+| メールアドレス        | char(30)    | YES  |     | NULL    |       |
+| 国名                  | varchar(20) | YES  |     | NULL    |       |
+| 性別                  | varchar(20) | YES  |     | NULL    |       |
+| 年齢                  | int         | YES  |     | NULL    |       |
++-----------------------+-------------+------+-----+---------+-------+
+
+INSERT INTO 回答者 ( メールアドレス,国名,性別,年齢 ) VALUES ( 'suzuki.takashi@mailsample.jp',NULL,'M',51 );
+INSERT INTO 回答者 ( メールアドレス,国名,性別,年齢 ) VALUES ( 'philip@mailsample.uk',NULL,'M',26 );
+INSERT INTO 回答者 ( メールアドレス,国名,性別,年齢 ) VALUES ( 'hao@mailsample.cn',NULL,'M',35 );
+INSERT INTO 回答者 ( メールアドレス,国名,性別,年齢 ) VALUES ( 'marie@mailsample.fr',NULL,'F',43 );
+INSERT INTO 回答者 ( メールアドレス,国名,性別,年齢 ) VALUES ( 'hoa@mailsample.vn',NULL,'F',22 );
++------------------------------+--------+--------+--------+
+| メールアドレス               | 国名   | 性別   | 年齢   |
++------------------------------+--------+--------+--------+
+| suzuki.takashi@mailsample.jp | NULL   | M      |     51 |
+| philip@mailsample.uk         | NULL   | M      |     26 |
+| hao@mailsample.cn            | NULL   | M      |     35 |
+| marie@mailsample.fr          | NULL   | F      |     43 |
+| hoa@mailsample.vn            | NULL   | F      |     22 |
++------------------------------+--------+--------+--------+
+
+(1)メールアドレスを元に国名を登録。
+アドレスの最後の２文字が国コードなので、日本語に変換して更新。
+１つのSQL文で全行を更新。
+
+《解説》急に難問レベル
+複雑なSQL文は最初から完成品を作ろうとは思わずに
+まず、いくつかの部品に分けて作ってみよう。
+
+＊UPDATE文の前に SELECT文で確認
+SELECT メールアドレス, 国名
+FROM 回答者
+;
++------------------------------+--------+
+| メールアドレス               | 国名   |
++------------------------------+--------+
+| suzuki.takashi@mailsample.jp | NULL   |
+| philip@mailsample.uk         | NULL   |
+| hao@mailsample.cn            | NULL   |
+| marie@mailsample.fr          | NULL   |
+| hoa@mailsample.vn            | NULL   |
++------------------------------+--------+
+
+＊UPDATE 回答者
+SET 国名 = (CASE句で日本語の国名)
+
+
+＊CASE句
+CASE 〇〇 WHEN 'jp' THEN '日本'
+          WHEN 'uk' THEN 'イギリス'
+          WHEN 'cn' THEN '中国'
+          WHEN 'fr' THEN 'フランス'
+          WHEN 'vn' THEN 'ベトナム'
+END
+
+
+＊上記〇〇部分
+【註】ここの「メールアドレス」は CHAR(10)なので
+      10byteに満たないときは空白が挿入されている。
+
+      => SUBSTRING()で目的の文字を抽出するには、
+      その前に空白を除去しておかないといけない。
+
+・SUBSTRING(対象文字列, 開始位置, 文字数): 文字の一部を抜き取る
+・TRIM(文字列): 空白を除去
+・LENGTH(文字列): 文字列の長さ(byte数)
+・文字列のところに列名を入れると、列の各行の要素を次々に処理
+
+    ↓ これらの関数を組み合わせて使う
+
+SUBSTRING(TRIM(メールアドレス), LENGTH(TRIM(メールアドレス))-1, 2)
+    => 対象文字列 TRIM(メールアドレス): メールアドレスの各行の文字列から空白を除去。
+    => LENGTH(TRIM(メールアドレス))-1:
+        空白を除去したメールアドレスの長さ - 1 (最後から２文字目)
+    => 2: ２文字分を抜き出す
+
+ 各部品を合体
+
+ 《解答》
+ UPDATE 回答者
+ SET 国名 =
+     CASE SUBSTRING(TRIM(メールアドレス), LENGTH(TRIM(メールアドレス))-1, 2)
+         WHEN 'jp' THEN '日本'
+         WHEN 'uk' THEN 'イギリス'
+         WHEN 'cn' THEN '中国'
+         WHEN 'fr' THEN 'フランス'
+         WHEN 'vn' THEN 'ベトナム'
+     END
+;
+Query OK, 5 rows affected (0.29 sec)
+Rows matched: 5  Changed: 5  Warnings: 0
+
+SELECT メールアドレス, 国名
+FROM 回答者
+;
++------------------------------+--------------+
+| メールアドレス               | 国名         |
++------------------------------+--------------+
+| suzuki.takashi@mailsample.jp | 日本         |
+| philip@mailsample.uk         | イギリス     |
+| hao@mailsample.cn            | 中国         |
+| marie@mailsample.fr          | フランス     |
+| hoa@mailsample.vn            | ベトナム     |
++------------------------------+--------------+
+
+
+(2)メールアドレス,性別,年齢の一覧表示。
+表示要件
+[1]メールアドレスの空白は除去
+[2]性別と年齢はひとつの項目とし、次のように表示。
+    例: 50代 : 男性
+   20代～50代までで良い。
+[3]項目の見出しは「メールアドレス」「属性」とする。
+
+《解説》これも、てんこ盛りなので、ひとつずつ部品化してみよう。
+＊[3] SELECT文
+SELECT □□ AS メールアドレス, 〇〇 AS 属性
+FROM 回答者
+;
+
+＊[1] □□: TRIM(メールアドレス)
+＊[2] 〇〇: => ２つの列を結合したうえで、置き換え
+            => CONCAT(), CASE句
+
+＊CONCAT(年齢,' : ',性別)
+
+＊CASE WHEN 20 <= 年齢 AND 年齢 < 30 THEN '20代'
+       WHEN 30 <= 年齢 AND 年齢 < 40 THEN '30代'
+       WHEN 40 <= 年齢 AND 年齢 < 50 THEN '40代'
+       WHEN 50 <= 年齢 AND 年齢 < 60 THEN '50代'
+  END
+
+ ＊CASE 性別 WHEN 'M' THEN '男性'
+             WHEN 'F' THEN '女性'
+   END
+
+ それを合体
+
+ 《解答》【註】テキストの「||」はMySQLで非対応。CONCAT()を使う。
+ SELECT TRIM(メールアドレス) AS メールアドレス, -- SELECT列リストの「,」
+        CONCAT(
+            CASE WHEN 20 <= 年齢 AND 年齢 < 30 THEN '20代'
+               WHEN 30 <= 年齢 AND 年齢 < 40 THEN '30代'
+               WHEN 40 <= 年齢 AND 年齢 < 50 THEN '40代'
+               WHEN 50 <= 年齢 AND 年齢 < 60 THEN '50代'
+            END, -- CONCAT( , , )の「,」
+        ' : ',   -- CONCAT( , , )の「,」
+            CASE 性別 WHEN 'M' THEN '男性'
+                      WHEN 'F' THEN '女性'
+            END
+        ) AS 属性 -- CONCAT()終了
+ FROM 回答者
+ ;
++------------------------------+----------------+
+| メールアドレス               | 属性           |
++------------------------------+----------------+
+| suzuki.takashi@mailsample.jp | 50代 : 男性    |
+| philip@mailsample.uk         | 20代 : 男性    |
+| hao@mailsample.cn            | 30代 : 男性    |
+| marie@mailsample.fr          | 40代 : 女性    |
+| hoa@mailsample.vn            | 20代 : 女性    |
++------------------------------+----------------+
+
+
+◆練習問題５－３
+
+(1)文字数を全行更新、バイト数でなく文字数を返す関数で。
+    [MySQL] CHAR_LENGTH()
+《解説》
+＊CHAR_LENGTH(): 文字数で取れる関数[MySQL]
+＊TRIM(): 空白は文字数に含めないので除去
+
+《解答》
+UPDATE 受注者
+SET 文字数 = CHAR_LENGTH(TRIM(文字))
+;
+
+【註】テキスト解答は REPLACE(文字,'　',' ') となっているが
+全角スペースを半角スペースに置き換えても除去したことにならないのでは？(先生に要確認)
+
+
+(2)受注日, 受注ID, 文字数, 書体名, 単価, 特別加工料を一覧表示。受注日および受注ID順。
+特別加工料の掛からないものは０とする。
+
+《解説》
+「一覧表示」-> SELECT文
+「〇〇順に並べる」-> ORDER BY
+「特別加工料の掛からないものは０とする」-> CASE句
+  書体名は書体コードから場合分けして置換 -> CASE句
+  単価は書体コードに応じて場合分け -> CASE句
+  書体コードがないもの -> NULLになっているので COALSCE()
+
+また部品ごとに作っていこう。
+＊SELECT文
+SELECT 受注日, 受注ID, 文字数, 書体名, 単価, 特別加工料
+FROM 受注
+;
+
+＊○○順
+ORDER BY 受注日 ASC, 受注ID ASC
+
+＊CASE句
+CASE WHEN 文字数 > 10 THEN 特別加工料 = 500
+     ELSE 特別加工料 = 0
+END AS 特別加工料
+
+＊CASE句
+CASE 書体コード WHEN '1' THEN 'ブロック体'
+                WHEN '2' THEN '筆記体'
+                WHEN '3' THEN '草書体'
+END AS 書体名
+
+
+＊CASE句
+CASE 書体コード WHEN '1' THEN '100'
+                WHEN '2' THEN '150'
+                WHEN '3' THEN '200'
+END AS 単価
+
+
+＊↑上記の「書体コード」部分にこれを埋め込み
+COALESCE(書体コード,'1')  //NULLの場合はブロック体に置換
+
+
+これらを合体
+
+《解答》
+SELECT 受注日, 受注ID, 文字数,
+    CASE COALESCE(書体コード,'1')
+        WHEN '1' THEN 'ブロック体'
+        WHEN '2' THEN '筆記体'
+        WHEN '3' THEN '草書体'
+    END AS 書体名,
+
+    CASE COALESCE(書体コード,'1')
+        WHEN '1' THEN '100' //【要確認】書体コードは VARCHAR型なので「'」が必要では？
+        WHEN '2' THEN '150'
+        WHEN '3' THEN '200'
+    END AS 単価,
+
+    CASE WHEN 文字数 > 10 THEN 500
+    ELSE 0
+    END AS 特別加工料
+
+FROM 受注
+ORDER BY 受注日 ASC, 受注ID ASC
+;
+
+
+(3)受注ID = '113' の 半角スペースを「★」に変更
+《解説》REPLACE()を使うUPDATE文
+
+《解答》
+UPDATE 受注
+SET 文字 = REPLACE(文字, ' ','★')
+WHERE 受注ID = '113'
+;
